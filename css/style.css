@@ -1,3 +1,4 @@
+/* AI assisted */
 :root {
     --bg: #0b0f0c;
     --panel: #0d140f;
@@ -6,7 +7,7 @@
     --error: #ff5c5c;
     --warn: #ffe27a;
     --info: #c2cb8a;
-    --scanline: linear-gradient(rgba(0,0,0,.00) 50%, rgba(0,0,0,.12) 51%);
+    --scanline: linear-gradient(#00000000 50%, #0000001f 51%);
 }
 
 html,body {
@@ -31,9 +32,9 @@ body {
 }
 
 .terminal {
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,.5), inset 0 0 0 1px var(--muted);
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 2px, rgba(0,0,0,0) 2px 4px), var(--panel);
+    border-radius: 10px;
+    box-shadow: 0 10px 40px #00000080, inset 0 0 0 1px var(--muted);
+    background: repeating-linear-gradient(0deg, #00000014 0 2px, #00000000 2px 4px), var(--panel);
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -45,7 +46,7 @@ body {
     align-items: center;
     padding: 10px 15px;
     border-bottom: 1px solid var(--muted);
-    background: rgba(0,0,0,.2);
+    background: #00000033;
     user-select: none;
 }
 

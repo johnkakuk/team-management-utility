@@ -163,9 +163,10 @@ class Methods {
                     break;
 
                 case "getEmployee1":
+                    
                     const userArgs = input.value;
 
-                    // If positive number OR matches an index, save to global variable up top. Else error
+                    // If blank, error. Else pass for later validation
                     if (!userArgs) {
                         console.error("Invalid input.")
                         console.info("Select a user by full name or ID:");
@@ -173,9 +174,11 @@ class Methods {
                     } else {
                         currentData = userArgs;
                         currentStage = "getEmployeeComplete";
-                        Methods.selectEmployee();
+                        Methods.selectEmployee(userArgs, pendingOperation);
                         break;
                     }
+
+                    
             }
 
             // Reset input
@@ -213,6 +216,7 @@ class Methods {
 
 
     static selectEmployee(argv, operation) {
+        let validated = false;
         pendingOperation = operation;
 
         if (employees.length == 0) {
@@ -234,14 +238,17 @@ class Methods {
                 inputState = false;
                 currentStage = "";
                 currentData = parseInt(currentData) - 1;
+                validated = true;
             } else {
                 // Otherwise, attempt to find name match. Should always work, protected above by handler switch case getEmployee1
                 // Reset
                 inputState = false;
                 currentStage = "";
                 currentData = employees.findIndex(emp => emp.name.toLowerCase() === currentData.toLowerCase());
+                validated = true;
             }
         }
+        
         
         // Run on first call only and only if no args were supplied, otherwise attempt to run args
         if ((!argv) && (currentStage == "getEmployee")) {
@@ -262,41 +269,60 @@ class Methods {
                 inputState = false;
                 currentStage = "";
                 currentData = parseInt(currentData) - 1;
+                validated = true;
             } else {
                 // Otherwise, attempt to find name match. Should always work, protected above by handler switch case getEmployee1
                 // Reset
                 inputState = false;
                 currentStage = "";
                 currentData = employees.findIndex(emp => emp.name.toLowerCase() === currentData.toLowerCase());
+                validated = true;
             } 
         }
 
         // Selection successful. Validate. If fail, reset and abort
         if (currentData < 0 || currentData > employees.length) {
-            console.error("No matching employees found.")
+            console.error("No matching employee found.")
             currentStage = "";
             pendingOperation = "";
         }
         
         // Validated. Run operation
-        switch (pendingOperation) {
-            case "remove":
-                const confirmationName = employees[currentData].name;
-                employees.splice(currentData, 1);
-                console.log(`Successfully removed ${confirmationName}`)
-                break;
-            case "edit":
-                break;
-            case "display":
-                break;
+        if (validated) {
+            switch (pendingOperation) {
+                case "remove":
+                    const confirmationName = employees[currentData].name;
+                    employees.splice(currentData, 1);
+                    console.log(`Successfully removed ${confirmationName}`)
+                    break;
+                case "edit":
+                    break;
+                case "display":
+                    console.log(currentData);
+                    let employeeRole = "";
+                    if(!employees[currentData].role) {
+                        employeeRole = "Full Time";
+                    } else {
+                        employeeRole = employees[currentData].role;
+                    }
+                    console.log(`Employee details: ${employees[currentData].name}`)
+                    console.log(`----------------------------`);
+                    console.log(`         Pay rate: ${employees[currentData]} / hour`);
+                    console.log(`     Hours / week: ${employees[currentData]}`);
+                    console.log(`Avg yearly income: ${employees[currentData]}`);
+                    console.log(`             Role: ${employeeRole}`);
+                    break;
+            }
+
+            // Big reset after successful operation
+            currentStage = "";
+            currentData = "";
+            pendingOperation = "";
+            inputState = false;
+            input.value = "";
         }
 
-        // Big reset
-        currentStage = "";
-        currentData = "";
-        pendingOperation = "";
-        inputState = false;
-        input.value = "";
+        
 
 
     // 1: SELECT

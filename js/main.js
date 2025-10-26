@@ -91,17 +91,25 @@ register('add', () => {
 
 register('remove', (argv) => {
     if (argv.length > 1) {
-        console.error(`Usage: remove "Full Name"`);
+        console.error(`Usage syntax: remove "Full Name"`);
         return;
     }
     Methods.selectEmployee(argv[0], "remove");
 }, 'Remove an employee');
 
 register('edit', (argv) => {
+    if (argv.length > 1) {
+        console.error(`Usage syntax: edit "Full Name"`);
+        return;
+    }
     Methods.selectEmployee(argv[0], "edit");
 }, 'Edit an employee');
 
 register('display', (argv) => {
+    if (argv.length > 1) {
+        console.error(`Usage syntax: display "Full Name"`);
+        return;
+    }
     Methods.selectEmployee(argv[0], "display");
 }, "Display an employee's details");
 

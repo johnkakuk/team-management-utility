@@ -1,8 +1,5 @@
 import {
-    input,
-    output,
-    screen,
-    newline
+    input
 } from './main.js'
 
 let inputState = false;
@@ -298,7 +295,6 @@ class Methods {
                 case "edit":
                     break;
                 case "display":
-                    console.log(currentData);
                     let employeeRole = "";
                     if(!employees[currentData].role) {
                         employeeRole = "Full Time";
@@ -306,11 +302,11 @@ class Methods {
                         employeeRole = employees[currentData].role;
                     }
                     console.log(`Employee details: ${employees[currentData].name}`)
-                    console.log(`----------------------------`);
-                    console.log(`         Pay rate: ${employees[currentData]} / hour`);
-                    console.log(`     Hours / week: ${employees[currentData]}`);
-                    console.log(`Avg yearly income: ${employees[currentData]}`);
-                    console.log(`             Role: ${employeeRole}`);
+                    console.log(`-------------------------------`);
+                    console.log(`Pay rate:           $${employees[currentData].rate} / hour`);
+                    console.log(`Hours / week:       ${employees[currentData].hours}`);
+                    console.log(`Avg yearly income:  $${employees[currentData].salary.toLocaleString()}`);
+                    console.log(`Role:               ${employeeRole}`);
                     break;
             }
 

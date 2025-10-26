@@ -1,5 +1,5 @@
 import {
-    Methods,
+    Methods
 } from './team.js'
 
 // Define master variables
@@ -67,32 +67,65 @@ function register(name, handler, desc) {
 //    C O N S O L E   F U N C T I O N S    //
 //                                         //
 /////////////////////////////////////////////
-register('help', (argv) => {
+// Utilities
+register('help', () => {
     const rows = Object.keys(state.commands)
         .sort()
         .map(k => `  ${k.padEnd(10)} - ${state.commands[k].desc || ''}`);
     console.log(rows.join('\n'));
 }, 'List available commands');
 
-register('clear', () => { output.innerHTML=''; }, 'Clear the screen');
+register('clear', () => {
+    output.innerHTML='';
+    banner();
+}, 'Clear the screen');
 
 register('about', () => {
     console.log('Team management utility by John Kakuk.');
 }, 'About this console');
 
+// Main CRUD functions
 register('add', () => {
     Methods.addEmployee();
 }, 'Add a new employee');
 
+register('remove', (argv) => {
+    if (argv.length > 1) {
+        console.error(`Usage: remove "Full Name"`);
+        return;
+    }
+    Methods.selectEmployee(argv[0], "remove");
+}, 'Remove an employee');
+
+register('edit', (argv) => {
+    Methods.selectEmployee(argv[0], "edit");
+}, 'Edit an employee');
+
+register('display', (argv) => {
+    Methods.selectEmployee(argv[0], "display");
+}, "Display an employee's details");
+
+register('list', () => {
+    Methods.selectEmployee();
+}, "List all employees");
+
+// 1) Tokenizer (supports "double" or 'single' quotes)
+function parseArgs(str) {
+  const out = [];
+  const re = /"([^"]*)"|'([^']*)'|(\S+)/g;
+  let m;
+  while ((m = re.exec(str))) out.push(m[1] ?? m[2] ?? m[3]);
+  return out;
+}
 
 // Command execution (AI assisted)
 function exec(line){
-    const argv = line.trim().split(/\s+/);
-    const cmd = argv[0];
-    if(!cmd) return;
+    const argv = parseArgs(line.trim());
+    const cmd = argv.shift();
+    if (!cmd) return;
     const item = state.commands[cmd];
-    if(!item){ console.error(`command not found: ${cmd}`); return; }
-    try{ item.handler(argv); } catch(err){ console.error(err.message || String(err)); }
+    if (!item) { console.error(`command not found: ${cmd}`); return; }
+    try { item.handler(argv); } catch (err) { console.error(err.message || String(err)); }
 }
 
 // Key event handler

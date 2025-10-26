@@ -2,6 +2,7 @@ import {
     input
 } from './main.js'
 
+// Global variables for data operations
 let inputState = false;
 let currentStage = "";
 let currentData = "";
@@ -45,11 +46,14 @@ class PartTime extends Employee {
     }
 }
 
-class Methods {
+class Main {
+    // Used static to avoid having to instantiate the class
     static isBlocking() {
         return inputState;
     }
 
+    // Okay. This guy is HUGE and a little unwieldy. There's got to be a better way to handle this
+    // But I'm very sleepy
     static handleSubKeydown(e) {
         if(e.key==='Enter'){
             e.preventDefault();
@@ -68,8 +72,16 @@ class Methods {
 
             const outputLine = document.querySelector("#output > div:last-of-type > span");
 
-            
+            // That's the basics out of the way. Now we check for the currentStage global up top
+            // That indicates that one of the methods below is running
+            // If a currentStage is detected, these handlers validate data and loop/abort if rejected
+            // If validation passes, data is handled and the stage is advanced, and the current method is run again
+            // The methods check for completion on each loop and wrap things up if true
+            // Otherwise they do nothing and the eventListeners wait for user input.
+            // When the user hits enter, this switch will run again.
+            // And repeat until the user cancels or finishes their operation
             switch (currentStage) {
+                // HANDLERS FOR EDIT FUNCTION
                 case "editName":
                     // Validation
                     const proposedNameEdit = input.value;
@@ -78,7 +90,7 @@ class Methods {
                     if (!proposedNameEdit) {
                         currentStage = "editRate";
                         console.info("Rate:");
-                        Methods.selectEmployee(currentData, pendingOperation);
+                        Main.selectEmployee(currentData, pendingOperation);
                         break;
                     }
                     // Check for existing names
@@ -93,7 +105,7 @@ class Methods {
                     outputLine.innerHTML = `${outputLine.innerHTML} - ${proposedNameEdit}`;
                     currentStage = "editRate";
                     console.info("Rate:");
-                    Methods.selectEmployee(currentData, pendingOperation);
+                    Main.selectEmployee(currentData, pendingOperation);
                     break;
 
 
@@ -103,14 +115,14 @@ class Methods {
                     if (!proposedRateEdit) {
                         currentStage = "editHours";
                         console.info("Hours:");
-                        Methods.selectEmployee(currentData, pendingOperation);
+                        Main.selectEmployee(currentData, pendingOperation);
                         break;
                     } else if (proposedRateEdit > 0) {
                         employees[currentData].rate = proposedRateEdit;
                         outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
                         currentStage = "editHours";
                         console.info("Hours:");
-                        Methods.selectEmployee(currentData, pendingOperation);
+                        Main.selectEmployee(currentData, pendingOperation);
                         break;
                     } else {
                         // Validation
@@ -118,6 +130,7 @@ class Methods {
                         console.info("Rate:");
                         break;
                     }
+
 
                 case "editHours":
                     const proposedHoursEdit = input.value;
@@ -136,7 +149,7 @@ class Methods {
                         outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
                         currentStage = "editIsManager";
                         console.info("Manager? Y/N");
-                        Methods.selectEmployee(currentData, pendingOperation);
+                        Main.selectEmployee(currentData, pendingOperation);
                         break;
                     } else {
                         // Validation 2
@@ -157,7 +170,7 @@ class Methods {
                     else {
                         console.error("Invalid input.")
                         console.info("Manager? Y/N");
-                        Methods.selectEmployee(currentData, pendingOperation);
+                        Main.selectEmployee(currentData, pendingOperation);
                         break;
                     }
                     outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
@@ -180,10 +193,11 @@ class Methods {
                 case "editEmployee":
                     console.info("Name:");
                     currentStage = "editName";
-                    Methods.selectEmployee(currentData, pendingOperation);
+                    Main.selectEmployee(currentData, pendingOperation);
                     break;
                     
 
+                // HANDLERS FOR ADD FUNCTION
                 case "getName":
                     // Validation
                     const proposedName = input.value;
@@ -206,7 +220,7 @@ class Methods {
                     outputLine.innerHTML = `${outputLine.innerHTML} - ${proposedName}`;
                     currentStage = "getRate";
                     console.info("Rate:");
-                    Methods.addEmployee();
+                    Main.addEmployee();
                     break;
 
 
@@ -218,7 +232,7 @@ class Methods {
                         outputLine.innerHTML = `${outputLine.innerHTML} - ${proposedRate}`;
                         currentStage = "getHours";
                         console.info("Hours:");
-                        Methods.addEmployee();
+                        Main.addEmployee();
                         break;
                     } else {
                         // Validation
@@ -241,7 +255,7 @@ class Methods {
                         outputLine.innerHTML = `${outputLine.innerHTML} - ${proposedHours}`;
                         currentStage = "getManager";
                         console.info("Manager? Y/N");
-                        Methods.addEmployee();
+                        Main.addEmployee();
                         break;
                     } else {
                         // Validation 2
@@ -249,7 +263,6 @@ class Methods {
                         console.info("Hours:");
                         break;
                     }
-
 
                 case "getManager":
                     input.value = input.value.toUpperCase();
@@ -262,22 +275,23 @@ class Methods {
                     }
                     outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
                     currentStage = "addEmployeeComplete";
-                    Methods.addEmployee();
+                    Main.addEmployee();
                     break;
 
 
                 case "addEmployee":
                     console.info("Name:");
                     currentStage = "getName";
-                    Methods.addEmployee();
+                    Main.addEmployee();
                     break;
 
 
-                // Handler for Methods.selectEmployee()
+                // HANDLERS FOR SELECT FUNCTION
                 case "getEmployee":
                     console.info("Select a user by full name or ID:");
                     currentStage = "getEmployee1";
                     break;
+
 
                 case "getEmployee1":
                     
@@ -291,16 +305,13 @@ class Methods {
                     } else {
                         currentData = userArgs;
                         currentStage = "getEmployeeComplete";
-                        Methods.selectEmployee(userArgs, pendingOperation);
+                        Main.selectEmployee(userArgs, pendingOperation);
                         break;
-                    }
-
-                    
+                    }      
             }
 
-            // Reset input
+            // Reset and return once finished
             input.value = "";
-            
             return;
         }
     }
@@ -331,7 +342,8 @@ class Methods {
         }
     }
 
-
+    // This is a BIG ONE. This method selects an employee AND runs an operation on them, passed in from main.js
+    // Pairs initimately with handleSubKeydown to get user input
     static selectEmployee(argv, operation) {
         let validated = false;
         pendingOperation = operation;
@@ -405,7 +417,6 @@ class Methods {
 
         // Selection successful. Validate. If fail, reset and abort
         if (currentData < 0 || currentData > employees.length) {
-            console.log(currentData);
             console.error("No matching employee found.");
             currentStage = "";
             pendingOperation = "";
@@ -414,13 +425,15 @@ class Methods {
         // Validated. Run operation
         if (validated) {
             switch (pendingOperation) {
+                // Remove employee
                 case "remove":
                     const confirmationName = employees[currentData].name;
+                    // Used Splice instead of Filter (personal preference)
                     employees.splice(currentData, 1);
                     console.log(`Successfully removed ${confirmationName}`)
                     break;
 
-
+                // Edit employee
                 case "edit":
                     console.log(`Editing ${employees[currentData].name}. Press Enter to keep current value. Type 'cancel' to abort`);
                     inputState = true;
@@ -430,10 +443,10 @@ class Methods {
                         currentStage = "editEmployee";
                     }
 
-                    Methods.selectEmployee(currentData, pendingOperation);
+                    Main.selectEmployee(currentData, pendingOperation);
                     break;
 
-
+                // Display employee data
                 case "display":
                     let employeeRole = "";
                     if(!employees[currentData].role) {
@@ -460,9 +473,7 @@ class Methods {
             }
         }
 
-        
-
-
+    // Pseudocode
     // 1: SELECT
     // If command has args
         // If args are text
@@ -473,23 +484,21 @@ class Methods {
         // Show all employees
         // Request ID from user
 
-    // 2A: REMOVE
-        // Confirm user wants to remove employee NAME
-        // Break or continue
-        // Splice out employee (index = ID - 1)
+        // 2A: REMOVE
+            // Confirm user wants to remove employee NAME
+            // Break or continue
+            // Splice out employee (index = ID - 1)
 
+        // 2B: EDIT
+            // Confirm user wants to edit employee Name
+            // Break or continue
+            // Save current employee index as global (currentData)
+            // Run through all attributes (just like adding)
+            // Edit, or skip with blank enter
+            // Confirm once finished
 
-    // 2B: EDIT
-        // Confirm user wants to edit employee Name
-        // Break or continue
-        // Save employee index
-        // Splice out employee
-        // Run addEmployee()
-        // Pop last employee to transient variable
-        // Splice in to saved index
-
-    // 2C: DISPLAY
-        // Console.log user details
+        // 2C: DISPLAY
+            // Console.log user details
     }
 }
 
@@ -498,10 +507,10 @@ class Methods {
     employees.push(new Manager("John A", 22, 40));
     employees.push(new Employee("Mark D", 16, 40));
     employees.push(new PartTime("Alissa E", 18, 20));
-    input.addEventListener('keydown', Methods.handleSubKeydown);
+    input.addEventListener('keydown', Main.handleSubKeydown);
 })();
 
 export {
-    Methods,
+    Main,
     employees
 }

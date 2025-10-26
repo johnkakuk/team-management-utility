@@ -114,7 +114,7 @@ register('display', (argv) => {
 }, "Display an employee's details");
 
 register('list', () => {
-    Methods.selectEmployee();
+    Methods.selectEmployee(null, "list");
 }, "List all employees");
 
 // 1) Tokenizer (supports "double" or 'single' quotes)

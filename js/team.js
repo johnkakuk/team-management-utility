@@ -22,7 +22,12 @@ class Employee {
         this.name = _name;
         this.rate = _rate; 
         this.hours = _hours;
-        this.salary = this.rate * this.hours * 52;
+        // this.salary = this.rate * this.hours * 52;
+        // Static variable, doesn't play nice with Edit function
+    }
+
+    getSalary() {
+        return this.rate * this.hours * 52;
     }
 }
 
@@ -63,7 +68,122 @@ class Methods {
 
             const outputLine = document.querySelector("#output > div:last-of-type > span");
 
+            
             switch (currentStage) {
+                case "editName":
+                    // Validation
+                    const proposedNameEdit = input.value;
+
+                    // Check for blank submission
+                    if (!proposedNameEdit) {
+                        currentStage = "editRate";
+                        console.info("Rate:");
+                        Methods.selectEmployee(currentData, pendingOperation);
+                        break;
+                    }
+                    // Check for existing names
+                    if (employees.findIndex(emp => emp.name.toLowerCase() === proposedNameEdit.toLowerCase()) >= 0) {
+                        console.error(`An employee named "${proposedNameEdit}" already exists.`);
+                        console.info('Enter a different name:');
+                        break;
+                    }
+
+                    // Success
+                    employees[currentData].name = proposedNameEdit;
+                    outputLine.innerHTML = `${outputLine.innerHTML} - ${proposedNameEdit}`;
+                    currentStage = "editRate";
+                    console.info("Rate:");
+                    Methods.selectEmployee(currentData, pendingOperation);
+                    break;
+
+
+                case "editRate":
+                    // Success
+                    const proposedRateEdit = input.value;
+                    if (!proposedRateEdit) {
+                        currentStage = "editHours";
+                        console.info("Hours:");
+                        Methods.selectEmployee(currentData, pendingOperation);
+                        break;
+                    } else if (proposedRateEdit > 0) {
+                        employees[currentData].rate = proposedRateEdit;
+                        outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
+                        currentStage = "editHours";
+                        console.info("Hours:");
+                        Methods.selectEmployee(currentData, pendingOperation);
+                        break;
+                    } else {
+                        // Validation
+                        console.error("Must be a positive number.");
+                        console.info("Rate:");
+                        break;
+                    }
+
+                case "editHours":
+                    const proposedHoursEdit = input.value;
+                    // Validation 1
+                    if (!proposedHoursEdit) {
+                        currentStage = "editIsManager";
+                        console.info("Manager? Y/N");
+                        break;
+                    } else if (proposedHoursEdit > 168) {
+                        console.error("Only 168 hours in a week.");
+                        console.info("Hours:");
+                        break;
+                    } // Success
+                    else if (proposedHoursEdit > 0) {
+                        employees[currentData].hours = proposedHoursEdit;
+                        outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
+                        currentStage = "editIsManager";
+                        console.info("Manager? Y/N");
+                        Methods.selectEmployee(currentData, pendingOperation);
+                        break;
+                    } else {
+                        // Validation 2
+                        console.error("Must be a positive number.");
+                        console.info("Hours:");
+                        break;
+                    }
+
+
+                case "editIsManager":
+                    if (!input.value) {
+                        currentStage = "editEmployeeComplete";
+                        break;
+                    }
+                    input.value = input.value.toUpperCase();
+                    if(input.value === "Y") employees[currentData].isManager = true;
+                    else if(input.value === "N") employees[currentData].isManager = false;
+                    else {
+                        console.error("Invalid input.")
+                        console.info("Manager? Y/N");
+                        Methods.selectEmployee(currentData, pendingOperation);
+                        break;
+                    }
+                    outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
+                    currentStage = "editEmployeeComplete";
+                    // No break; fall through to next one
+
+                // Handle complete
+                case "editEmployeeComplete":
+                    // Console confirmation
+                    console.log(`${employees[currentData].name} edited successfully`);
+
+                    // Reset
+                    inputState = false;
+                    currentStage = "";
+                    pendingOperation = "";
+                    input.value = "";
+                    break;
+
+
+                case "editEmployee":
+                    console.info("Name:");
+                    currentStage = "editName";
+                    Methods.selectEmployee(currentData, pendingOperation);
+                    break;
+                    
+
                 case "getName":
                     // Validation
                     const proposedName = input.value;
@@ -82,8 +202,8 @@ class Methods {
                     }
 
                     // Success
-                    newEmployeeInfo.name = input.value;
-                    outputLine.innerHTML = `${outputLine.innerHTML} - ${input.value}`;
+                    newEmployeeInfo.name = proposedName;
+                    outputLine.innerHTML = `${outputLine.innerHTML} - ${proposedName}`;
                     currentStage = "getRate";
                     console.info("Rate:");
                     Methods.addEmployee();
@@ -257,6 +377,12 @@ class Methods {
                     console.error("An unspecified error occurred.");
                 }
             }
+            if (pendingOperation == "list") {
+                inputState = false;
+                currentStage = "";
+                currentData = "";
+                validated = true;
+            };
         } else if (typeof argv == 'string' && currentStage == "getEmployee") {
             currentData = argv;
 
@@ -279,7 +405,8 @@ class Methods {
 
         // Selection successful. Validate. If fail, reset and abort
         if (currentData < 0 || currentData > employees.length) {
-            console.error("No matching employee found.")
+            console.log(currentData);
+            console.error("No matching employee found.");
             currentStage = "";
             pendingOperation = "";
         }
@@ -292,8 +419,21 @@ class Methods {
                     employees.splice(currentData, 1);
                     console.log(`Successfully removed ${confirmationName}`)
                     break;
+
+
                 case "edit":
+                    console.log(`Editing ${employees[currentData].name}. Press Enter to keep current value. Type 'cancel' to abort`);
+                    inputState = true;
+
+                    // Setup
+                    if (currentStage == "") {
+                        currentStage = "editEmployee";
+                    }
+
+                    Methods.selectEmployee(currentData, pendingOperation);
                     break;
+
+
                 case "display":
                     let employeeRole = "";
                     if(!employees[currentData].role) {
@@ -305,17 +445,19 @@ class Methods {
                     console.log(`-------------------------------`);
                     console.log(`Pay rate:           $${employees[currentData].rate} / hour`);
                     console.log(`Hours / week:       ${employees[currentData].hours}`);
-                    console.log(`Avg yearly income:  $${employees[currentData].salary.toLocaleString()}`);
+                    console.log(`Avg yearly income:  $${employees[currentData].getSalary().toLocaleString()}`);
                     console.log(`Role:               ${employeeRole}`);
                     break;
             }
 
             // Big reset after successful operation
-            currentStage = "";
-            currentData = "";
-            pendingOperation = "";
-            inputState = false;
-            input.value = "";
+            if (pendingOperation !== "edit" || currentStage === "editEmployeeComplete") {
+                currentStage = "";
+                currentData = "";
+                pendingOperation = "";
+                inputState = false;
+                input.value = "";
+            }
         }
 
         

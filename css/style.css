@@ -63,6 +63,7 @@ body {
     overflow: auto;
     padding: 15px;
     position: relative;
+    margin-bottom: 1px;
 }
 
 #output {
@@ -141,6 +142,7 @@ body {
 
 .stamp {
     opacity: 0.6;
+    min-width: 110px !important;
 }
 
 .soft {
@@ -224,4 +226,66 @@ body {
 
 .cm-searchMatch.cm-searchMatch-selected {
   background-color: rgba(115, 255, 122, 0.3);
+}
+
+.help {
+    white-space: pre-line;
+}
+
+/* Navigation */
+/* List UI */
+.listui { margin-top: 0.5rem; }
+.listui .soft { margin-bottom: 0.25rem; }
+
+.menu {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  max-height: 40vh;          /* keeps lists compact */
+  overflow: auto;            /* allow scrolling */
+  border: 1px solid rgba(0,255,128,0.12);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.35);
+}
+
+.menu li {
+  padding: 6px 10px;
+  line-height: 1.2;
+  cursor: default;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.menu li .stamp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  opacity: 0.9;
+  min-width: 8.2ch;          /* fits YYYY-MM-DD */
+  color: #7CFFB2;            /* retro green accent */
+}
+
+.menu li:not(.active):hover {
+  background: rgba(0,255,128,0.06);
+}
+
+.menu li.active {
+  background: rgba(0,255,128,0.18);
+  outline: 1px solid rgba(0,255,128,0.35);
+}
+
+.menu::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.menu::-webkit-scrollbar-thumb {
+  background: rgba(0,255,128,0.25);
+  border-radius: 6px;
+}
+.menu::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.25);
+}
+
+.cm-line.completed .todo-text {
+  opacity: 0.6;        /* example style */
+  text-decoration: line-through;
 }

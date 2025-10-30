@@ -48,6 +48,7 @@ body {
     border-bottom: 1px solid var(--muted);
     background: #00000033;
     user-select: none;
+    margin-bottom: 1px;
 }
 
 .title {
@@ -169,4 +170,58 @@ body {
     .titlebar {
         padding: 8px 10px;
     }
+}
+/* Add CodeMirror search panel theming directly in style.css */
+
+.cm-panels {
+  background-color: rgba(0, 0, 0, 0.85);
+  color: var(--text);
+  border-bottom: 1px solid rgba(115, 255, 122, 0.25);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.cm-panel.cm-search {
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-panel.cm-search label {
+  color: rgba(115, 255, 122, 0.9);
+}
+
+.cm-panel.cm-search input {
+  background-color: rgba(115, 255, 122, 0.08);
+  color: var(--text);
+  border: 1px solid rgba(115, 255, 122, 0.25);
+  border-radius: 4px;
+  padding: 4px 6px;
+  outline: none;
+}
+
+.cm-panel.cm-search input::placeholder {
+  color: rgba(115, 255, 122, 0.5);
+}
+
+.cm-panel.cm-search button {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(115, 255, 122, 0.25);
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cm-panel.cm-search button:hover {
+  background-color: rgba(115, 255, 122, 0.1);
+}
+
+.cm-searchMatch {
+  background-color: rgba(115, 255, 122, 0.15);
+}
+
+.cm-searchMatch.cm-searchMatch-selected {
+  background-color: rgba(115, 255, 122, 0.3);
 }

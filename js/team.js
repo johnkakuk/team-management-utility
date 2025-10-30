@@ -1,5 +1,6 @@
 import {
-    input
+    input,
+    print
 } from './main.js'
 
 // Global variables for data operations

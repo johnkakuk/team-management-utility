@@ -307,6 +307,26 @@ export function startEditor(shell, opts = {}) {
     }
   }
 
+  // Track unsaved changes in the banner (writer header)
+  let unsaved = false;
+
+  function markUnsaved() {
+    if (unsaved) return;
+    const bannerEl = document.querySelector('.writer-header');
+    if (bannerEl && !bannerEl.textContent.trim().endsWith('*')) {
+      bannerEl.textContent += ' *';
+      unsaved = true;
+    }
+  }
+
+  function clearUnsaved() {
+    const bannerEl = document.querySelector('.writer-header');
+    if (bannerEl) {
+      bannerEl.textContent = bannerEl.textContent.replace(/\s*\*$/, '');
+      unsaved = false;
+    }
+  }
+
   // Restore console UI from snapshot and remove writer UI
   function restoreEditorDom() {
     const root = document.getElementById('writerRoot');
@@ -441,6 +461,13 @@ export function startEditor(shell, opts = {}) {
     });
   });
 
+  const markDirtyListener = EditorView.updateListener.of((update) => {
+    if (update.docChanged) {
+      markUnsaved();
+      state.dirty = true;
+    }
+  });
+
   // --- Indentation config & smart Tab for Markdown lists/quotes -------------
   const INDENT = '  '; // two spaces
   const indentConfig = indentUnit.of(INDENT);
@@ -525,6 +552,7 @@ export function startEditor(shell, opts = {}) {
       drawSelection(),
       highlightActiveLine(),
       snapOutOfView,
+      markDirtyListener,
       history(),
       todoPlugin,
       scrollByLine,
@@ -554,6 +582,7 @@ export function startEditor(shell, opts = {}) {
       // Persist to SQLite via preload bridge if available
       try { window.db && typeof window.db.upsert === 'function' && window.db.upsert(state.date, text); } catch {}
     }
+    clearUnsaved();
     state.dirty = false;
 
     const status = document.getElementById('writerStatus');
